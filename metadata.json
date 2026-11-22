@@ -1,0 +1,6 @@
+{
+  "name": "자취방 선택 도우미",
+  "description": "p5.js 기반 대학생 자취방 다각도 비교, 가중치 평가, 현장 체크리스트 및 방문 일정 관리 웹 애플리케이션",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
