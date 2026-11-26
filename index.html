@@ -1,681 +1,518 @@
 <!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>자취방 선택 도우미</title>
-    <meta
-      name="description"
-      content="p5.js 기반 대학생 자취방 매물 비교, 가중치 평가, 현장 방문 체크리스트 및 방문 일정 관리 웹 애플리케이션"
-    />
-    <meta property="og:title" content="자취방 선택 도우미" />
-    <meta
-      property="og:description"
-      content="p5.js 인터랙티브 레이더 차트와 캠퍼스 지도로 자취방을 한눈에 비교하고 방문 일정을 관리하세요."
-    />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Noto+Sans+KR:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="./style.css" />
-    <script src="https://cdn.jsdelivr.net/npm/p5@1.9.4/lib/p5.min.js"></script>
-  </head>
-  <body data-screen="intro" data-tab="overview">
-    <!-- 앱 시작 시 데이터 로딩 스피너 -->
-    <div id="loading-overlay" class="loading-overlay" role="status" aria-live="polite">
-      <div class="loading-card">
-        <div class="loading-spinner" aria-hidden="true"></div>
-        <p class="loading-title">자취방 데이터를 불러오는 중입니다</p>
-        <p class="loading-sub">저장된 매물과 p5.js 비교 차트를 준비하고 있습니다.</p>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>자취방 선택 도우미</title>
+  <link href="https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- 상단 60px 헤더: 홈은 왼쪽에 햄버거 버튼과 제목 -->
+  <header class="app-header">
+    <button type="button" class="menu-btn" onclick="openMenu()" aria-label="메뉴 열기" aria-expanded="false">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <line x1="4" y1="7" x2="20" y2="7"></line>
+        <line x1="4" y1="12" x2="20" y2="12"></line>
+        <line x1="4" y1="17" x2="20" y2="17"></line>
+      </svg>
+    </button>
+    <h1 class="header-title">자취방 선택 도우미</h1>
+  </header>
+
+  <!-- 햄버거 메뉴 배경 및 280px(모바일) / 240px(1024px 이상 고정) 메뉴 (5개 항목) -->
+  <div class="menu-dim" onclick="closeMenu()" aria-hidden="true"></div>
+  <aside class="side-menu" aria-label="전체 메뉴">
+    <div class="side-menu-head">
+      <span class="side-menu-brand">자취방 선택 도우미</span>
+      <button type="button" class="menu-close-btn" onclick="closeMenu()" aria-label="메뉴 닫기">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <nav class="side-menu-nav">
+      <a href="index.html" class="side-menu-link is-active">홈</a>
+      <a href="register.html" class="side-menu-link">매물 등록</a>
+      <a href="checklist.html" class="side-menu-link">현장 체크리스트</a>
+      <a href="memo.html" class="side-menu-link">메모와 별점</a>
+      <a href="calendar.html" class="side-menu-link">방문 일정</a>
+    </nav>
+  </aside>
+
+  <main class="main-wrap">
+    <div class="container">
+      <!-- 요약 영역 3칸 (나중에 JS로 rooms 배열 기반 숫자 계산 후 교체) -->
+      <section class="summary-grid" aria-label="매물 현황 요약">
+        <div class="summary-cell">
+          <span class="summary-label">등록한 매물</span>
+          <strong class="summary-value">4</strong>
+        </div>
+        <div class="summary-cell">
+          <span class="summary-label">평가 완료</span>
+          <strong class="summary-value">3</strong>
+        </div>
+        <div class="summary-cell">
+          <span class="summary-label">체크 전</span>
+          <strong class="summary-value">1</strong>
+        </div>
+      </section>
+
+      <!-- 다가오는 방문 일정 1건 (나중에 JS로 가장 가까운 visitDate 매물 바인딩) -->
+      <a href="calendar.html" class="upcoming-visit">
+        <div class="visit-date-box">
+          <span class="visit-date-month">11월</span>
+          <strong class="visit-date-day">23일</strong>
+        </div>
+        <div class="visit-info-box">
+          <span class="visit-caption">다가오는 방문 일정</span>
+          <strong class="visit-room-title">봉천동 청운하우스</strong>
+        </div>
+      </a>
+
+      <!-- 필터 버튼 + 오른쪽 추천순 표시 -->
+      <div class="filter-bar">
+        <div class="filter-group" role="group" aria-label="매물 상태 필터">
+          <button type="button" class="filter-btn is-active" data-filter="all" aria-pressed="true" onclick="setRoomFilter('all')">전체</button>
+          <button type="button" class="filter-btn" data-filter="done" aria-pressed="false" onclick="setRoomFilter('done')">평가 완료</button>
+          <button type="button" class="filter-btn" data-filter="pending" aria-pressed="false" onclick="setRoomFilter('pending')">체크 전</button>
+        </div>
+        <span class="sort-label">추천순</span>
       </div>
+
+      <!-- 가중치 기준 한 줄 (변경 링크로만 weights.html 진입) -->
+      <div class="weight-summary-row">
+        <span class="weight-summary-text">가격 40%, 거리 30%, 면적 15%, 집 상태 15%</span>
+        <a href="weights.html" class="weight-change-link">변경</a>
+      </div>
+
+      <!-- 매물 카드 목록 (renderRoomList()로 필터·순위 기준에 맞게 렌더링) -->
+      <section class="room-list" aria-label="등록된 매물 목록">
+        <!-- 예시 매물 1 -->
+        <a href="register.html?id=1" class="room-card">
+          <div class="room-thumb" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7A6553" stroke-width="1.6">
+              <path d="M3 10.5L12 3l9 7.5"></path>
+              <path d="M5 9.5V20h14V9.5"></path>
+              <rect x="9.5" y="13" width="5" height="7"></rect>
+            </svg>
+          </div>
+          <div class="room-card-body">
+            <div class="room-card-top">
+              <span class="rank-badge is-first">1위</span>
+              <h2 class="room-name">상도동 햇살빌라</h2>
+            </div>
+            <p class="room-price">보증금 1,000 / 월세 52</p>
+          </div>
+          <div class="room-score-box">
+            <span class="room-score">92점</span>
+          </div>
+        </a>
+
+        <!-- 예시 매물 2 -->
+        <a href="register.html?id=2" class="room-card">
+          <div class="room-thumb" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7A6553" stroke-width="1.6">
+              <path d="M3 10.5L12 3l9 7.5"></path>
+              <path d="M5 9.5V20h14V9.5"></path>
+              <rect x="9.5" y="13" width="5" height="7"></rect>
+            </svg>
+          </div>
+          <div class="room-card-body">
+            <div class="room-card-top">
+              <span class="rank-badge">2위</span>
+              <h2 class="room-name">봉천동 청운하우스</h2>
+            </div>
+            <p class="room-price">보증금 500 / 월세 45</p>
+          </div>
+          <div class="room-score-box">
+            <span class="room-score">84점</span>
+          </div>
+        </a>
+
+        <!-- 예시 매물 3 -->
+        <a href="register.html?id=3" class="room-card">
+          <div class="room-thumb" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7A6553" stroke-width="1.6">
+              <path d="M3 10.5L12 3l9 7.5"></path>
+              <path d="M5 9.5V20h14V9.5"></path>
+              <rect x="9.5" y="13" width="5" height="7"></rect>
+            </svg>
+          </div>
+          <div class="room-card-body">
+            <div class="room-card-top">
+              <span class="rank-badge">3위</span>
+              <h2 class="room-name">흑석동 그린원룸</h2>
+            </div>
+            <p class="room-price">보증금 2,000 / 월세 40</p>
+          </div>
+          <div class="room-score-box">
+            <span class="room-score">78점</span>
+          </div>
+        </a>
+
+        <!-- 예시 매물 4 (체크리스트 전 상태) -->
+        <a href="register.html?id=4" class="room-card">
+          <div class="room-thumb" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7A6553" stroke-width="1.6">
+              <path d="M3 10.5L12 3l9 7.5"></path>
+              <path d="M5 9.5V20h14V9.5"></path>
+              <rect x="9.5" y="13" width="5" height="7"></rect>
+            </svg>
+          </div>
+          <div class="room-card-body">
+            <div class="room-card-top">
+              <h2 class="room-name">대방동 미소빌</h2>
+            </div>
+            <p class="room-price">보증금 1,000 / 월세 48</p>
+          </div>
+          <div class="room-score-box">
+            <span class="room-score is-pending">체크 전</span>
+          </div>
+        </a>
+      </section>
     </div>
 
-    <!-- 1단계: 첫 화면 (소개 화면) -->
-    <section id="screen-intro" class="screen-view is-active" aria-labelledby="intro-main-title">
-      <header class="intro-topbar">
-        <span class="brand-wordmark">자취방 선택 도우미</span>
-        <span class="intro-team-line">제작: 최지원 · 김세정 · 김수현 · 배지은</span>
-        <button type="button" id="btn-intro-fullscreen" class="btn-outline" aria-pressed="false">
-          전체 화면
-        </button>
-      </header>
-
-      <main class="intro-container">
-        <div class="intro-hero-grid">
-          <div class="intro-copy-col">
-            <p class="kicker-text">대학 생활 주거 의사결정 워크스페이스</p>
-            <h1 id="intro-main-title" class="intro-title">
-              데이터와 현장 점검으로<br />가장 나다운 자취방을 고르세요
-            </h1>
-            <p class="intro-lead">
-              보증금·월세·통학 거리·면적·옵션 조건을 가중치에 따라 실시간으로 점수화하고,
-              p5.js 인터랙티브 레이더 차트와 캠퍼스 지도로 한눈에 비교하는 팀 프로젝트 도구입니다.
-            </p>
-
-            <div class="intro-cta-row">
-              <button type="button" id="btn-start-app" class="btn-primary btn-lg">
-                시작하기
-              </button>
-              <button type="button" id="btn-intro-credits" class="btn-outline btn-lg">
-                엔딩 크레딧 보기
-              </button>
-            </div>
-
-            <div class="intro-creators-block">
-              <h2 class="section-eyebrow">프로젝트 제작진</h2>
-              <p class="creators-names">최지원, 김세정, 김수현, 배지은</p>
-              <p class="creators-note">
-                최초 실행 시 바로 비교해 볼 수 있도록 샘플 매물 3개와 샘플 방문 일정이 기본 제공되며,
-                모든 변경 내용은 브라우저에 자동 저장됩니다.
-              </p>
-            </div>
-          </div>
-
-          <div class="intro-guide-col">
-            <div class="intro-photo-mosaic">
-              <figure class="mosaic-item">
-                <img
-                  src="./src/assets/images/sample_room_sunny_1795341124410.jpg"
-                  alt="정문 앞 햇살 원룸 샘플 이미지"
-                  referrerpolicy="no-referrer"
-                />
-                <figcaption>정문 앞 햇살 원룸 · 도보 4분</figcaption>
-              </figure>
-              <figure class="mosaic-item">
-                <img
-                  src="./src/assets/images/sample_room_officetel_1795341125535.jpg"
-                  alt="역세권 모던 오피스텔 샘플 이미지"
-                  referrerpolicy="no-referrer"
-                />
-                <figcaption>역세권 모던 오피스텔 · 풀옵션</figcaption>
-              </figure>
-              <figure class="mosaic-item">
-                <img
-                  src="./src/assets/images/sample_room_villa_1795341124880.jpg"
-                  alt="후문 조용한 1.5룸 빌라 샘플 이미지"
-                  referrerpolicy="no-referrer"
-                />
-                <figcaption>후문 조용한 1.5룸 빌라 · 9.2평</figcaption>
-              </figure>
-            </div>
-
-            <div class="intro-steps-panel">
-              <h2 class="section-eyebrow">간단한 사용 방법</h2>
-              <ol class="intro-step-list">
-                <li>
-                  <strong>01. 매물 등록 &amp; 사진 업로드</strong>
-                  <span>보증금·월세·관리비·거리·면적·옵션과 현장 사진을 압축해 등록합니다.</span>
-                </li>
-                <li>
-                  <strong>02. 가중치 조절 &amp; p5.js 비교</strong>
-                  <span>중요한 항목의 슬라이더를 조절하고, 지도 핀을 드래그해 실시간 순위를 확인합니다.</span>
-                </li>
-                <li>
-                  <strong>03. 현장 방문 체크리스트 &amp; 별점</strong>
-                  <span>수압·채광·곰팡이·방음·옵션 상태를 기록하고 별점과 메모를 남깁니다.</span>
-                </li>
-                <li>
-                  <strong>04. 방문 일정 캘린더 &amp; 결과 저장</strong>
-                  <span>달력에서 방 보러 갈 일정을 관리하고 최종 비교표를 PNG·리포트 파일로 저장합니다.</span>
-                </li>
-              </ol>
-            </div>
-          </div>
-        </div>
-      </main>
-    </section>
-
-    <!-- 2단계: 메인 기능 화면 -->
-    <section id="screen-main" class="screen-view" hidden aria-label="자취방 비교 및 관리 워크스페이스">
-      <header class="main-topbar">
-        <div class="topbar-brand-zone">
-          <button type="button" id="btn-back-intro" class="brand-home-btn" aria-label="소개 화면으로 돌아가기">
-            자취방 선택 도우미
-          </button>
-        </div>
-
-        <nav class="topbar-nav-zone" role="tablist" aria-label="주요 기능 메뉴">
-          <button
-            type="button"
-            role="tab"
-            class="nav-tab-btn is-active"
-            data-tab="overview"
-            aria-selected="true"
-          >
-            종합 비교 · 시각화
-          </button>
-          <button
-            type="button"
-            role="tab"
-            class="nav-tab-btn"
-            data-tab="properties"
-            aria-selected="false"
-          >
-            매물 등록 · 수정
-          </button>
-          <button
-            type="button"
-            role="tab"
-            class="nav-tab-btn"
-            data-tab="checklist"
-            aria-selected="false"
-          >
-            현장 체크리스트
-          </button>
-          <button
-            type="button"
-            role="tab"
-            class="nav-tab-btn"
-            data-tab="calendar"
-            aria-selected="false"
-          >
-            방문 일정 캘린더
-          </button>
-        </nav>
-
-        <div class="topbar-actions-zone">
-          <button type="button" id="btn-fullscreen-main" class="btn-outline" aria-pressed="false">
-            전체 화면
-          </button>
-          <button type="button" id="btn-export-png" class="btn-primary">
-            PNG 저장
-          </button>
-          <button type="button" id="btn-export-txt" class="btn-outline">
-            요약 리포트
-          </button>
-          <button type="button" id="btn-go-credits" class="btn-ghost">
-            크레딧
-          </button>
-        </div>
-      </header>
-
-      <main class="main-workspace">
-        <!-- 탭 1: 종합 비교 · p5.js 시각화 & 가중치 -->
-        <section id="tab-overview" class="tab-panel" role="tabpanel" aria-label="종합 비교 및 시각화">
-          <div class="overview-grid">
-            <div class="canvas-column">
-              <div class="panel-toolbar">
-                <div class="segmented-group" role="group" aria-label="캔버스 시각화 보기 전환">
-                  <button
-                    type="button"
-                    class="seg-btn is-active"
-                    data-viz-mode="both"
-                    aria-pressed="true"
-                  >
-                    레이더 + 지도
-                  </button>
-                  <button type="button" class="seg-btn" data-viz-mode="radar" aria-pressed="false">
-                    레이더 차트
-                  </button>
-                  <button type="button" class="seg-btn" data-viz-mode="map" aria-pressed="false">
-                    캠퍼스 지도
-                  </button>
-                </div>
-
-                <div class="toolbar-right-actions">
-                  <button type="button" id="btn-reset-pins" class="btn-outline btn-sm">
-                    핀 위치 정렬
-                  </button>
-                  <button type="button" id="btn-reset-samples" class="btn-outline btn-sm">
-                    샘플 초기화
-                  </button>
-                </div>
-              </div>
-
-              <div id="p5-canvas-container" class="p5-canvas-container" data-testid="p5-canvas-host"></div>
-            </div>
-
-            <aside class="sidebar-column" aria-label="가중치 설정 및 추천 순위">
-              <!-- 평가 가중치 설정 (김수현 담당) -->
-              <section class="surface-box">
-                <div class="surface-header">
-                  <div>
-                    <h2 class="surface-title">평가 항목별 가중치 설정</h2>
-                    <p class="surface-desc">슬라이더 조절 시 종합점수와 순위가 즉시 재계산됩니다.</p>
-                  </div>
-                </div>
-
-                <div class="preset-row" role="group" aria-label="가중치 프리셋">
-                  <button type="button" class="preset-btn" data-preset="balanced">균형 기본</button>
-                  <button type="button" class="preset-btn" data-preset="budget">가성비 우선</button>
-                  <button type="button" class="preset-btn" data-preset="commute">통학 우선</button>
-                  <button type="button" class="preset-btn" data-preset="space">넓이 우선</button>
-                </div>
-
-                <div class="weight-sliders">
-                  <div class="slider-item">
-                    <div class="slider-label-row">
-                      <label for="weight-price">가격 (보증금·월세·관리비)</label>
-                      <span id="weight-price-pct" class="tabular-nums weight-pct">35%</span>
-                    </div>
-                    <input type="range" id="weight-price" min="0" max="100" value="35" />
-                  </div>
-
-                  <div class="slider-item">
-                    <div class="slider-label-row">
-                      <label for="weight-distance">거리 (학교 도보 통학)</label>
-                      <span id="weight-distance-pct" class="tabular-nums weight-pct">30%</span>
-                    </div>
-                    <input type="range" id="weight-distance" min="0" max="100" value="30" />
-                  </div>
-
-                  <div class="slider-item">
-                    <div class="slider-label-row">
-                      <label for="weight-area">면적 (전용 평수)</label>
-                      <span id="weight-area-pct" class="tabular-nums weight-pct">20%</span>
-                    </div>
-                    <input type="range" id="weight-area" min="0" max="100" value="20" />
-                  </div>
-
-                  <div class="slider-item">
-                    <div class="slider-label-row">
-                      <label for="weight-option">옵션 (생활 가전·보안)</label>
-                      <span id="weight-option-pct" class="tabular-nums weight-pct">15%</span>
-                    </div>
-                    <input type="range" id="weight-option" min="0" max="100" value="15" />
-                  </div>
-                </div>
-              </section>
-
-              <!-- 실시간 추천 순위 리스트 -->
-              <section class="surface-box">
-                <div class="surface-header">
-                  <div>
-                    <h2 class="surface-title">실시간 추천 순위</h2>
-                    <p class="surface-desc">매물을 클릭하면 상세 점검 및 강조 표시가 전환됩니다.</p>
-                  </div>
-                  <button type="button" id="btn-quick-add-room" class="btn-outline btn-sm">
-                    + 매물 추가
-                  </button>
-                </div>
-                <div id="ranking-list-container" class="ranking-list-container"></div>
-              </section>
-            </aside>
-          </div>
-        </section>
-
-        <!-- 탭 2: 매물 등록 · 수정 · 사진 업로드 (최지원 담당) -->
-        <section id="tab-properties" class="tab-panel" role="tabpanel" hidden aria-label="매물 등록 및 관리">
-          <div class="two-col-workspace">
-            <section class="surface-box">
-              <div class="surface-header">
-                <div>
-                  <h2 id="prop-form-title" class="surface-title">새 자취방 매물 등록</h2>
-                  <p class="surface-desc">금액, 통학 시간, 면적, 옵션과 현장 사진을 등록·수정합니다.</p>
-                </div>
-              </div>
-
-              <form id="property-form" class="app-form" novalidate>
-                <div class="form-grid-2">
-                  <div class="form-field">
-                    <label for="prop-name">매물명 *</label>
-                    <input
-                      type="text"
-                      id="prop-name"
-                      placeholder="예: 정문 앞 햇살 원룸"
-                      required
-                    />
-                  </div>
-                  <div class="form-field">
-                    <label for="prop-room-type">방 유형 · 층수</label>
-                    <input
-                      type="text"
-                      id="prop-room-type"
-                      placeholder="예: 분리형 원룸 · 3층"
-                    />
-                  </div>
-                </div>
-
-                <div class="form-grid-3">
-                  <div class="form-field">
-                    <label for="prop-deposit">보증금 (만원) *</label>
-                    <input type="number" id="prop-deposit" min="0" step="50" placeholder="500" required />
-                  </div>
-                  <div class="form-field">
-                    <label for="prop-rent">월세 (만원) *</label>
-                    <input type="number" id="prop-rent" min="1" step="1" placeholder="45" required />
-                  </div>
-                  <div class="form-field">
-                    <label for="prop-fee">관리비 (만원)</label>
-                    <input type="number" id="prop-fee" min="0" step="1" placeholder="5" />
-                  </div>
-                </div>
-
-                <div class="form-grid-3">
-                  <div class="form-field">
-                    <label for="prop-distance">학교까지 도보 (분) *</label>
-                    <input
-                      type="number"
-                      id="prop-distance"
-                      min="1"
-                      max="60"
-                      step="1"
-                      placeholder="5"
-                      required
-                    />
-                  </div>
-                  <div class="form-field">
-                    <label for="prop-area">전용 면적 (평) *</label>
-                    <input
-                      type="number"
-                      id="prop-area"
-                      min="1"
-                      max="40"
-                      step="0.1"
-                      placeholder="6.5"
-                      required
-                    />
-                  </div>
-                  <div class="form-field">
-                    <label for="prop-address">위치 메모</label>
-                    <input
-                      type="text"
-                      id="prop-address"
-                      placeholder="예: 정문 편의점 뒤 골목"
-                    />
-                  </div>
-                </div>
-
-                <fieldset class="form-fieldset">
-                  <legend>기본 제공 옵션 선택</legend>
-                  <div id="prop-options-grid" class="options-check-grid"></div>
-                </fieldset>
-
-                <div class="form-field">
-                  <label for="prop-photo-input">현장 사진 업로드 (자동 압축 · 미리보기)</label>
-                  <input type="file" id="prop-photo-input" accept="image/*" multiple />
-                  <div id="prop-photo-preview-list" class="photo-preview-grid"></div>
-                </div>
-
-                <div class="form-actions-row">
-                  <button type="submit" id="prop-form-submit" class="btn-primary">
-                    매물 등록하기
-                  </button>
-                  <button type="button" id="prop-form-reset" class="btn-outline">
-                    입력 초기화
-                  </button>
-                </div>
-              </form>
-            </section>
-
-            <section class="surface-box">
-              <div class="surface-header">
-                <div>
-                  <h2 class="surface-title">등록된 매물 목록</h2>
-                  <p class="surface-desc">수정 버튼을 누르면 왼쪽 폼에서 내용을 편집할 수 있습니다.</p>
-                </div>
-              </div>
-              <div id="manage-property-list" class="ranking-list-container"></div>
-            </section>
-          </div>
-        </section>
-
-        <!-- 탭 3: 현장 방문 체크리스트 & 메모/별점 (김세정 담당) -->
-        <section id="tab-checklist" class="tab-panel" role="tabpanel" hidden aria-label="현장 방문 체크리스트">
-          <div class="checklist-topbar surface-box">
-            <div class="checklist-select-wrap">
-              <label for="checklist-property-select">점검할 매물 선택</label>
-              <select id="checklist-property-select"></select>
-            </div>
-            <p id="checklist-progress-summary" class="checklist-progress-text tabular-nums"></p>
-          </div>
-
-          <div id="checklist-empty" class="surface-box empty-state-box" hidden>
-            점검할 매물이 없습니다. [매물 등록 · 수정] 탭에서 매물을 먼저 추가해 주세요.
-          </div>
-
-          <div id="checklist-workspace" class="two-col-workspace">
-            <section class="surface-box">
-              <div class="surface-header">
-                <div>
-                  <h2 id="checklist-room-title" class="surface-title">매물 현장 점검표</h2>
-                  <p id="checklist-room-meta" class="surface-desc tabular-nums"></p>
-                </div>
-              </div>
-
-              <div id="checklist-photo-strip" class="checklist-photo-strip"></div>
-              <div id="checklist-items-container" class="checklist-items-list"></div>
-            </section>
-
-            <section class="surface-box">
-              <div class="surface-header">
-                <div>
-                  <h2 class="surface-title">매물 종합 별점 &amp; 현장 메모</h2>
-                  <p class="surface-desc">입력 내용은 즉시 자동 저장되며 종합 추천 목록에 반영됩니다.</p>
-                </div>
-              </div>
-
-              <div class="rating-section">
-                <div class="rating-header">
-                  <span>현장 만족도 별점</span>
-                  <strong id="checklist-star-value" class="tabular-nums">0 / 5.0</strong>
-                </div>
-                <div id="checklist-star-buttons" class="star-buttons-row" role="group" aria-label="별점 선택">
-                  <button type="button" class="star-btn" data-star="1" aria-label="별점 1점">★</button>
-                  <button type="button" class="star-btn" data-star="2" aria-label="별점 2점">★</button>
-                  <button type="button" class="star-btn" data-star="3" aria-label="별점 3점">★</button>
-                  <button type="button" class="star-btn" data-star="4" aria-label="별점 4점">★</button>
-                  <button type="button" class="star-btn" data-star="5" aria-label="별점 5점">★</button>
-                </div>
-              </div>
-
-              <div class="form-field">
-                <label for="checklist-memo-input">방문 소감 · 계약 전 확인 사항 메모</label>
-                <textarea
-                  id="checklist-memo-input"
-                  rows="9"
-                  placeholder="예: 집주인 연락처, 관리비 포함 항목(수도/인터넷), 입주 가능 날짜, 도배/장판 교체 여부 등을 자유롭게 기록하세요."
-                ></textarea>
-              </div>
-            </section>
-          </div>
-        </section>
-
-        <!-- 탭 4: 달력 및 방문 일정 관리 (배지은 담당) -->
-        <section id="tab-calendar" class="tab-panel" role="tabpanel" hidden aria-label="방문 일정 캘린더">
-          <div class="calendar-workspace-grid">
-            <section class="surface-box">
-              <div class="calendar-header-bar">
-                <div>
-                  <h2 id="cal-month-label" class="surface-title tabular-nums">2026년 11월</h2>
-                  <p class="surface-desc">날짜를 클릭해 해당 날짜의 방문 일정을 빠르게 예약하세요.</p>
-                </div>
-                <div class="calendar-nav-btns">
-                  <button type="button" id="cal-prev-month" class="btn-outline btn-sm" aria-label="이전 달">
-                    이전 달
-                  </button>
-                  <button type="button" id="cal-today-btn" class="btn-outline btn-sm">
-                    오늘
-                  </button>
-                  <button type="button" id="cal-next-month" class="btn-outline btn-sm" aria-label="다음 달">
-                    다음 달
-                  </button>
-                </div>
-              </div>
-
-              <div class="calendar-weekdays" aria-hidden="true">
-                <span>일</span>
-                <span>월</span>
-                <span>화</span>
-                <span>수</span>
-                <span>목</span>
-                <span>금</span>
-                <span>토</span>
-              </div>
-              <div id="cal-grid-body" class="calendar-grid-body"></div>
-            </section>
-
-            <aside class="calendar-side-col">
-              <section class="surface-box">
-                <div class="surface-header">
-                  <div>
-                    <h2 class="surface-title">새 현장 방문 일정 등록</h2>
-                    <p class="surface-desc">매물과 방문 날짜·시간을 지정해 캘린더에 추가합니다.</p>
-                  </div>
-                </div>
-
-                <form id="visit-form" class="app-form" novalidate>
-                  <div class="form-field">
-                    <label for="visit-property-select">방문할 매물</label>
-                    <select id="visit-property-select"></select>
-                  </div>
-
-                  <div class="form-grid-2">
-                    <div class="form-field">
-                      <label for="visit-date-input">방문 날짜</label>
-                      <input type="date" id="visit-date-input" required />
-                    </div>
-                    <div class="form-field">
-                      <label for="visit-time-input">방문 시간</label>
-                      <input type="time" id="visit-time-input" value="14:00" />
-                    </div>
-                  </div>
-
-                  <div class="form-field">
-                    <label for="visit-memo-input">확인 메모</label>
-                    <input
-                      type="text"
-                      id="visit-memo-input"
-                      placeholder="예: 중개사님 1층 편의점 앞 미팅"
-                    />
-                  </div>
-
-                  <button type="submit" class="btn-primary">방문 일정 추가</button>
-                </form>
-              </section>
-
-              <section class="surface-box">
-                <div class="surface-header">
-                  <div>
-                    <h2 class="surface-title">예정된 방문 일정 목록</h2>
-                    <p class="surface-desc">방문 완료 여부를 체크하거나 일정을 삭제할 수 있습니다.</p>
-                  </div>
-                </div>
-                <div id="visit-schedule-list" class="visit-schedule-list"></div>
-              </section>
-            </aside>
-          </div>
-        </section>
-      </main>
-    </section>
-
-    <!-- 3단계: 마지막 화면 (Ending Credit) -->
-    <section id="screen-credits" class="screen-view" hidden aria-labelledby="credits-title">
-      <div class="credits-container">
-        <header class="credits-header">
-          <p class="kicker-text">Project Ending Credit</p>
-          <h1 id="credits-title" class="credits-title">자취방 선택 도우미</h1>
-          <p class="credits-subtitle">
-            p5.js 기반 대학생 자취방 비교·점검·일정 관리 웹 애플리케이션 팀 프로젝트
-          </p>
-        </header>
-
-        <section class="surface-box credits-section">
-          <h2 class="surface-title">팀원별 역할 분담</h2>
-          <div class="credits-team-grid">
-            <article class="credit-member-item">
-              <h3>최지원</h3>
-              <p class="credit-role">매물 등록 · 사진 업로드 모듈</p>
-              <p class="credit-detail">
-                매물 기본 정보·옵션 CRUD 구현, HTML5 Canvas 기반 업로드 이미지 자동 압축·미리보기 및 목록 관리 설계
-              </p>
-            </article>
-            <article class="credit-member-item">
-              <h3>김수현</h3>
-              <p class="credit-role">가중치 평가 · 순위 산출 엔진</p>
-              <p class="credit-detail">
-                가격·거리·면적·옵션 4개 항목 0~100점 정규화 수식, 가중치 슬라이더 및 실시간 추천 순위 재계산 로직 구현
-              </p>
-            </article>
-            <article class="credit-member-item">
-              <h3>김세정</h3>
-              <p class="credit-role">현장 방문 체크리스트 · 별점/메모</p>
-              <p class="credit-detail">
-                수압·채광·곰팡이·방음·옵션·보안 6대 점검 항목 상태 관리, 매물별 별점 평가 및 상세 현장 메모 자동 저장 구현
-              </p>
-            </article>
-            <article class="credit-member-item">
-              <h3>배지은</h3>
-              <p class="credit-role">방문 캘린더 · p5.js 시각화 통합</p>
-              <p class="credit-detail">
-                월간 달력 일정 등록·관리 UI 구현, p5.js 레이더 차트 및 드래그 가능한 캠퍼스 지도 핀 시각화·UI 통합
-              </p>
-            </article>
-          </div>
-        </section>
-
-        <div class="credits-two-col">
-          <section class="surface-box credits-section">
-            <h2 class="surface-title">사용 기술 및 구현 특징</h2>
-            <ul class="credits-tech-list">
-              <li><strong>HTML5 / CSS3 / Vanilla JavaScript (ES6+)</strong> — 별도 프레임워크 없이 GitHub Pages에 바로 배포 가능한 정적 모듈 구조</li>
-              <li><strong>p5.js (CDN v1.9.4)</strong> — 4축 레이더 차트, 점수 막대 그래프, 드래그 가능한 캠퍼스 지도 핀, fullscreen() 및 windowResized() 대응</li>
-              <li><strong>LocalStorage API</strong> — 매물, 압축 사진, 가중치, 체크리스트, 별점, 방문 일정 자동 저장 및 복원</li>
-              <li><strong>결과물 내보내기</strong> — p5.js saveCanvas()를 활용한 고해상도 PNG 요약 리포트 및 텍스트(.txt) 요약표 다운로드</li>
-            </ul>
-          </section>
-
-          <section class="surface-box credits-section">
-            <h2 class="surface-title">AI 활용 명시 내역</h2>
-            <p class="credits-ai-intro">
-              본 프로젝트는 수업의 AI 코드 사용 표기 규칙에 따라 생성형 AI의 도움을 받아 작성된 영역을 아래와 같이 투명하게 명시하며,
-              모든 함수·클래스 상단에 주석(@ai-assisted)으로 개별 표기하였습니다.
-            </p>
-            <ul class="credits-tech-list">
-              <li><strong>코드 모듈 구조화 및 주석 작성</strong> — 기능별 JS 파일 분리, JSDoc 설명 및 AI 활용 표기 주석 생성 지원</li>
-              <li><strong>p5.js 인터랙티브 시각화 수학</strong> — 레이더 차트 극좌표 변환, lerp() 점수 보간, 지도 핀 드래그 거리 역산 구현</li>
-              <li><strong>UI 스타일링 및 이미지 압축</strong> — 반응형 CSS 그리드 레이아웃 및 Canvas JPEG 압축 유틸리티 작성 지원</li>
-            </ul>
-          </section>
-        </div>
-
-        <footer class="credits-footer-actions">
-          <button type="button" id="btn-credits-home" class="btn-primary btn-lg">
-            처음으로 돌아가기
-          </button>
-          <button type="button" id="btn-credits-main" class="btn-outline btn-lg">
-            메인 화면으로 돌아가기
-          </button>
-        </footer>
-      </div>
-    </section>
-
-    <!-- 인앱 확인 모달 (window.confirm 대체) -->
-    <div
-      id="confirm-modal"
-      class="modal-backdrop"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="confirm-title"
-      hidden
-    >
-      <div class="modal-card">
-        <h2 id="confirm-title" class="surface-title">확인</h2>
-        <p id="confirm-message" class="modal-message"></p>
-        <div class="modal-actions">
-          <button type="button" id="confirm-cancel" class="btn-outline">취소</button>
-          <button type="button" id="confirm-accept" class="btn-danger">확인</button>
-        </div>
-      </div>
+    <!-- 하단 고정 버튼 영역: 매물 등록 버튼만 배치 -->
+    <div class="bottom-bar">
+      <a href="register.html" class="btn-primary">매물 등록</a>
     </div>
+  </main>
 
-    <!-- 토스트 알림 영역 -->
-    <div id="toast-region" class="toast-banner" role="status" aria-live="polite"></div>
+  <script src="js/common.js"></script>
+  <script>
+    var DEFAULT_SAMPLE_ROOMS = [
+      { id: 1, name: '상도동 햇살빌라', deposit: 1000, rent: 52, fee: 5, area: 23, time: 8, visitDate: '2026-11-25', evaluated: true, totalScore: 92 },
+      { id: 2, name: '봉천동 청운하우스', deposit: 500, rent: 45, fee: 4, area: 20, time: 12, visitDate: '2026-11-23', evaluated: true, totalScore: 84 },
+      { id: 3, name: '흑석동 그린원룸', deposit: 2000, rent: 40, fee: 5, area: 19, time: 15, visitDate: '2026-11-26', evaluated: true, totalScore: 78 },
+      { id: 4, name: '대방동 미소빌', deposit: 1000, rent: 48, fee: 5, area: 21, time: 14, visitDate: '2026-11-28', evaluated: false, totalScore: null }
+    ];
 
-    <!-- 기능별 모듈 스크립트 (의존성 순서대로 로드) -->
-    <script src="./js/scoring.js"></script>
-    <script src="./js/calendarUtils.js"></script>
-    <script src="./js/samples.js"></script>
-    <script src="./js/storage.js"></script>
-    <script src="./js/exporter.js"></script>
-    <script src="./js/canvasViz.js"></script>
-    <script src="./js/propertyManager.js"></script>
-    <script src="./js/checklistManager.js"></script>
-    <script src="./js/calendarManager.js"></script>
-    <script src="./sketch.js"></script>
-  </body>
+    var currentRoomFilter = 'all';
+
+    function getHomeRooms() {
+      if (typeof loadRooms === 'function') {
+        var fromCommon = loadRooms();
+        if (Array.isArray(fromCommon)) {
+          return fromCommon;
+        }
+      }
+      try {
+        var raw = localStorage.getItem('rooms');
+        if (raw !== null) {
+          var parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            return parsed;
+          }
+        }
+      } catch (e) {
+        // localStorage 파싱 실패 시 기본 예시 목록 사용
+      }
+      return DEFAULT_SAMPLE_ROOMS;
+    }
+
+    function isRoomEvaluated(room) {
+      if (!room) {
+        return false;
+      }
+      if (typeof room.evaluated === 'boolean') {
+        return room.evaluated;
+      }
+      if (typeof room.totalScore === 'number') {
+        return true;
+      }
+      var hasStars = room.stars && Object.keys(room.stars).some(function (key) {
+        return Number(room.stars[key]) > 0;
+      });
+      var hasChecks = room.checklist && Object.keys(room.checklist).some(function (key) {
+        return Boolean(room.checklist[key]);
+      });
+      return Boolean(hasStars || hasChecks);
+    }
+
+    function formatNumberWithComma(value) {
+      var num = Number(value) || 0;
+      return num.toLocaleString('ko-KR');
+    }
+
+    function createHouseThumb() {
+      var thumb = document.createElement('div');
+      thumb.className = 'room-thumb';
+      thumb.setAttribute('aria-hidden', 'true');
+
+      var svgNS = 'http://www.w3.org/2000/svg';
+      var svg = document.createElementNS(svgNS, 'svg');
+      svg.setAttribute('width', '28');
+      svg.setAttribute('height', '28');
+      svg.setAttribute('viewBox', '0 0 24 24');
+      svg.setAttribute('fill', 'none');
+      svg.setAttribute('stroke', '#7A6553');
+      svg.setAttribute('stroke-width', '1.6');
+
+      var path1 = document.createElementNS(svgNS, 'path');
+      path1.setAttribute('d', 'M3 10.5L12 3l9 7.5');
+      var path2 = document.createElementNS(svgNS, 'path');
+      path2.setAttribute('d', 'M5 9.5V20h14V9.5');
+      var rect = document.createElementNS(svgNS, 'rect');
+      rect.setAttribute('x', '9.5');
+      rect.setAttribute('y', '13');
+      rect.setAttribute('width', '5');
+      rect.setAttribute('height', '7');
+
+      svg.appendChild(path1);
+      svg.appendChild(path2);
+      svg.appendChild(rect);
+      thumb.appendChild(svg);
+      return thumb;
+    }
+
+    function setRoomFilter(filter) {
+      currentRoomFilter = filter;
+      var buttons = document.querySelectorAll('.filter-btn[data-filter]');
+      buttons.forEach(function (btn) {
+        var isMatch = btn.getAttribute('data-filter') === filter;
+        btn.classList.toggle('is-active', isMatch);
+        btn.setAttribute('aria-pressed', isMatch ? 'true' : 'false');
+      });
+      renderRoomList();
+    }
+
+    function renderRoomList() {
+      // localStorage의 매물 목록을 불러와 필터와 순위 기준에 맞춰 .room-list 안에 카드를 렌더링한다.
+      var listEl = document.querySelector('.room-list');
+      if (!listEl) {
+        return;
+      }
+
+      var rooms = getHomeRooms();
+      var sortedRooms = sortByTotal(rooms);
+
+      var rankMap = {};
+      var evalRank = 1;
+      sortedRooms.forEach(function (room) {
+        if (isRoomEvaluated(room)) {
+          rankMap[room.id] = evalRank;
+          evalRank += 1;
+        }
+      });
+
+      var totalCount = rooms.length;
+      var doneCount = rooms.filter(isRoomEvaluated).length;
+      var pendingCount = totalCount - doneCount;
+      var summaryValues = document.querySelectorAll('.summary-value');
+      if (summaryValues.length >= 3) {
+        summaryValues[0].textContent = String(totalCount);
+        summaryValues[1].textContent = String(doneCount);
+        summaryValues[2].textContent = String(pendingCount);
+      }
+
+      var now = new Date();
+      var todayStr = now.getFullYear() + '-' +
+        (now.getMonth() + 1 < 10 ? '0' + (now.getMonth() + 1) : String(now.getMonth() + 1)) + '-' +
+        (now.getDate() < 10 ? '0' + now.getDate() : String(now.getDate()));
+      var datedRooms = rooms.filter(function (r) {
+        return r && typeof r.visitDate === 'string' && r.visitDate.trim() !== '';
+      }).sort(function (a, b) {
+        return a.visitDate.localeCompare(b.visitDate);
+      });
+      var upcomingRoom = datedRooms.find(function (r) { return r.visitDate >= todayStr; }) || datedRooms[0];
+      var monthEl = document.querySelector('.visit-date-month');
+      var dayEl = document.querySelector('.visit-date-day');
+      var visitTitleEl = document.querySelector('.visit-room-title');
+      if (monthEl && dayEl && visitTitleEl) {
+        if (upcomingRoom) {
+          var dateParts = upcomingRoom.visitDate.split('-');
+          monthEl.textContent = parseInt(dateParts[1], 10) + '월';
+          dayEl.textContent = parseInt(dateParts[2], 10) + '일';
+          visitTitleEl.textContent = upcomingRoom.name || '이름 없는 매물';
+        } else {
+          monthEl.textContent = '-';
+          dayEl.textContent = '없음';
+          visitTitleEl.textContent = '예정된 방문 일정이 없어요';
+        }
+      }
+
+      var filteredRooms = sortedRooms.filter(function (room) {
+        var done = isRoomEvaluated(room);
+        if (currentRoomFilter === 'done') {
+          return done;
+        }
+        if (currentRoomFilter === 'pending') {
+          return !done;
+        }
+        return true;
+      });
+
+      listEl.innerHTML = '';
+
+      if (filteredRooms.length === 0) {
+        var emptyEl = document.createElement('p');
+        emptyEl.className = 'room-empty-text';
+        emptyEl.textContent = currentRoomFilter === 'done'
+          ? '평가 완료된 매물이 없어요.'
+          : (currentRoomFilter === 'pending' ? '체크 전 매물이 없어요.' : '등록된 매물이 없어요.');
+        listEl.appendChild(emptyEl);
+        return;
+      }
+
+      var fragment = document.createDocumentFragment();
+      filteredRooms.forEach(function (room) {
+        var done = isRoomEvaluated(room);
+        var score = done ? calcTotalScore(room, rooms) : null;
+        var rank = rankMap[room.id];
+
+        var card = document.createElement('a');
+        card.href = 'register.html?id=' + encodeURIComponent(room.id);
+        card.className = 'room-card';
+
+        if (room.photo) {
+          var thumb = document.createElement('div');
+          thumb.className = 'room-thumb';
+          var img = document.createElement('img');
+          img.src = room.photo;
+          img.alt = room.name || '매물 사진';
+          img.style.width = '100%';
+          img.style.height = '100%';
+          img.style.objectFit = 'cover';
+          thumb.appendChild(img);
+          card.appendChild(thumb);
+        } else {
+          card.appendChild(createHouseThumb());
+        }
+
+        var body = document.createElement('div');
+        body.className = 'room-card-body';
+
+        var topRow = document.createElement('div');
+        topRow.className = 'room-card-top';
+
+        if (done && rank) {
+          var badge = document.createElement('span');
+          badge.className = rank === 1 ? 'rank-badge is-first' : 'rank-badge';
+          badge.textContent = rank + '위';
+          topRow.appendChild(badge);
+        }
+
+        var nameEl = document.createElement('h2');
+        nameEl.className = 'room-name';
+        nameEl.textContent = room.name || '이름 없는 매물';
+        topRow.appendChild(nameEl);
+
+        var priceEl = document.createElement('p');
+        priceEl.className = 'room-price';
+        priceEl.textContent = '보증금 ' + formatNumberWithComma(room.deposit) + ' / 월세 ' + formatNumberWithComma(room.rent);
+
+        body.appendChild(topRow);
+        body.appendChild(priceEl);
+
+        var scoreBox = document.createElement('div');
+        scoreBox.className = 'room-score-box';
+
+        var scoreSpan = document.createElement('span');
+        if (done && score !== null) {
+          scoreSpan.className = 'room-score';
+          scoreSpan.textContent = score + '점';
+        } else {
+          scoreSpan.className = 'room-score is-pending';
+          scoreSpan.textContent = '체크 전';
+        }
+        scoreBox.appendChild(scoreSpan);
+
+        card.appendChild(body);
+        card.appendChild(scoreBox);
+        fragment.appendChild(card);
+      });
+
+      listEl.appendChild(fragment);
+    }
+
+    function calcTotalScore(room, rooms) {
+      // 가중치(weights)와 전체 매물 비교를 바탕으로 단일 매물(room)의 종합점수를 계산한다.
+      if (!room || !isRoomEvaluated(room)) {
+        return null;
+      }
+      if (typeof room.totalScore === 'number') {
+        return Math.round(room.totalScore);
+      }
+
+      var weights = { price: 8, dist: 6, area: 3, env: 3 };
+      try {
+        var rawWeights = localStorage.getItem('weights');
+        if (rawWeights) {
+          var parsedWeights = JSON.parse(rawWeights);
+          if (parsedWeights && typeof parsedWeights === 'object') {
+            weights = parsedWeights;
+          }
+        }
+      } catch (e) {
+        // 기본 가중치 사용
+      }
+
+      var sumW = (Number(weights.price) || 0) + (Number(weights.dist) || 0) + (Number(weights.area) || 0) + (Number(weights.env) || 0);
+      if (sumW <= 0) {
+        sumW = 1;
+      }
+
+      var list = Array.isArray(rooms) && rooms.length ? rooms : [room];
+      var costs = list.map(function (r) { return (Number(r.rent) || 0) + (Number(r.fee) || 0); });
+      var times = list.map(function (r) { return Number(r.time) || 0; });
+      var areas = list.map(function (r) { return Number(r.area) || 0; });
+
+      var minCost = Math.min.apply(null, costs);
+      var maxCost = Math.max.apply(null, costs);
+      var minTime = Math.min.apply(null, times);
+      var maxTime = Math.max.apply(null, times);
+      var minArea = Math.min.apply(null, areas);
+      var maxArea = Math.max.apply(null, areas);
+
+      var myCost = (Number(room.rent) || 0) + (Number(room.fee) || 0);
+      var myTime = Number(room.time) || 0;
+      var myArea = Number(room.area) || 0;
+
+      var priceScore = maxCost === minCost ? 100 : 100 - ((myCost - minCost) / (maxCost - minCost)) * 40;
+      var distScore = maxTime === minTime ? 100 : 100 - ((myTime - minTime) / (maxTime - minTime)) * 40;
+      var areaScore = maxArea === minArea ? 100 : 60 + ((myArea - minArea) / (maxArea - minArea)) * 40;
+
+      var starAvg = 3.5;
+      if (room.stars) {
+        var vals = Object.keys(room.stars).map(function (k) { return Number(room.stars[k]) || 0; }).filter(function (v) { return v > 0; });
+        if (vals.length) {
+          starAvg = vals.reduce(function (acc, cur) { return acc + cur; }, 0) / vals.length;
+        }
+      }
+      var envScore = (starAvg / 5) * 100;
+
+      var total = (
+        priceScore * (Number(weights.price) || 0) +
+        distScore * (Number(weights.dist) || 0) +
+        areaScore * (Number(weights.area) || 0) +
+        envScore * (Number(weights.env) || 0)
+      ) / sumW;
+
+      return Math.round(total);
+    }
+
+    function sortByTotal(rooms) {
+      // calcTotalScore 결과를 기준으로 매물 배열(rooms)을 추천순 내림차순 정렬한다.
+      if (!Array.isArray(rooms)) {
+        return [];
+      }
+      return rooms.slice().sort(function (a, b) {
+        var aDone = isRoomEvaluated(a);
+        var bDone = isRoomEvaluated(b);
+        if (aDone !== bDone) {
+          return aDone ? -1 : 1;
+        }
+        var aScore = calcTotalScore(a, rooms) || 0;
+        var bScore = calcTotalScore(b, rooms) || 0;
+        return bScore - aScore;
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      renderRoomList();
+    });
+  </script>
+</body>
 </html>

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>현장 체크리스트 · 자취방 선택 도우미</title>
+  <link href="https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="app-header">
+    <a href="index.html" class="back-btn" aria-label="뒤로 가기">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </a>
+    <h1 class="header-title">현장 체크리스트</h1>
+  </header>
+
+  <div class="menu-dim" onclick="closeMenu()" aria-hidden="true"></div>
+  <aside class="side-menu" aria-label="전체 메뉴">
+    <div class="side-menu-head">
+      <span class="side-menu-brand">자취방 선택 도우미</span>
+      <button type="button" class="menu-close-btn" onclick="closeMenu()" aria-label="메뉴 닫기">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <nav class="side-menu-nav">
+      <a href="index.html" class="side-menu-link">홈</a>
+      <a href="register.html" class="side-menu-link">매물 등록</a>
+      <a href="checklist.html" class="side-menu-link is-active">현장 체크리스트</a>
+      <a href="memo.html" class="side-menu-link">메모와 별점</a>
+      <a href="calendar.html" class="side-menu-link">방문 일정</a>
+    </nav>
+  </aside>
+
+  <main class="main-wrap">
+    <div class="container">
+      <!-- 상단 매물 표시: ?id= 가 있으면 매물 이름만 표시하고, ?id= 가 없으면 아래 select를 표시해 매물을 고르게 함 -->
+      <section class="room-context-card" aria-label="체크 중인 매물">
+        <h2 class="room-context-title">상도동 햇살빌라</h2>
+        <p class="room-context-sub">보증금 1,000 / 월세 52 · 방문일 2026-11-25</p>
+        <div class="form-field">
+          <label class="field-label" for="checklist-room-select">매물 선택</label>
+          <select id="checklist-room-select" class="select-input" onchange="renderChecklist(this.value)">
+            <option value="1" selected>상도동 햇살빌라</option>
+            <option value="2">봉천동 청운하우스</option>
+            <option value="3">흑석동 그린원룸</option>
+            <option value="4">대방동 미소빌</option>
+          </select>
+        </div>
+      </section>
+
+      <p class="guide-banner">확인한 항목에 체크해 주세요</p>
+
+      <!-- JS 연동 영역: 기본 6개 항목 + localStorage "checkItems" 배열의 사용자 추가 항목 표시 -->
+      <section class="checklist-list" aria-label="현장 확인 항목">
+        <div class="check-row">
+          <label class="check-label">
+            <input type="checkbox" checked onchange="toggleCheck(1, '햇빛이 잘 들어온다')">
+            <span>햇빛이 잘 들어온다</span>
+          </label>
+        </div>
+
+        <div class="check-row">
+          <label class="check-label">
+            <input type="checkbox" checked onchange="toggleCheck(1, '환기가 잘 된다')">
+            <span>환기가 잘 된다</span>
+          </label>
+        </div>
+
+        <div class="check-row">
+          <label class="check-label">
+            <input type="checkbox" checked onchange="toggleCheck(1, '수압이 충분하다')">
+            <span>수압이 충분하다</span>
+          </label>
+        </div>
+
+        <div class="check-row">
+          <label class="check-label">
+            <input type="checkbox" checked onchange="toggleCheck(1, '곰팡이나 얼룩이 없다')">
+            <span>곰팡이나 얼룩이 없다</span>
+          </label>
+        </div>
+
+        <div class="check-row">
+          <label class="check-label">
+            <input type="checkbox" onchange="toggleCheck(1, '소음이 심하지 않다')">
+            <span>소음이 심하지 않다</span>
+          </label>
+        </div>
+
+        <div class="check-row">
+          <label class="check-label">
+            <input type="checkbox" checked onchange="toggleCheck(1, '도어락이 있다')">
+            <span>도어락이 있다</span>
+          </label>
+        </div>
+
+        <!-- 직접 추가한 공통 항목 예시 (localStorage "checkItems"에 저장, 삭제 × 버튼 표시) -->
+        <div class="check-row is-custom">
+          <label class="check-label">
+            <input type="checkbox" onchange="toggleCheck(1, '엘리베이터가 있다')">
+            <span>엘리베이터가 있다</span>
+          </label>
+          <button type="button" class="check-delete-btn" onclick="removeCheckItem(0)" aria-label="항목 삭제">×</button>
+        </div>
+      </section>
+
+      <!-- 체크리스트 항목 직접 추가 영역 -->
+      <div class="check-add-row">
+        <input type="text" id="new-check-item" class="text-input" placeholder="예: 엘리베이터가 있다" aria-label="추가할 체크 항목">
+        <button type="button" class="check-add-btn" onclick="addCheckItem()">추가</button>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <a href="index.html" class="btn-primary">저장</a>
+    </div>
+  </main>
+
+  <script src="js/common.js"></script>
+  <script src="js/checklist.js"></script>
+</body>
+</html>

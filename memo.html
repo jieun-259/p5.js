@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>메모와 별점 · 자취방 선택 도우미</title>
+  <link href="https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="app-header">
+    <a href="index.html" class="back-btn" aria-label="뒤로 가기">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </a>
+    <h1 class="header-title">메모와 별점</h1>
+  </header>
+
+  <div class="menu-dim" onclick="closeMenu()" aria-hidden="true"></div>
+  <aside class="side-menu" aria-label="전체 메뉴">
+    <div class="side-menu-head">
+      <span class="side-menu-brand">자취방 선택 도우미</span>
+      <button type="button" class="menu-close-btn" onclick="closeMenu()" aria-label="메뉴 닫기">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <nav class="side-menu-nav">
+      <a href="index.html" class="side-menu-link">홈</a>
+      <a href="register.html" class="side-menu-link">매물 등록</a>
+      <a href="checklist.html" class="side-menu-link">현장 체크리스트</a>
+      <a href="memo.html" class="side-menu-link is-active">메모와 별점</a>
+      <a href="calendar.html" class="side-menu-link">방문 일정</a>
+    </nav>
+  </aside>
+
+  <main class="main-wrap">
+    <div class="container">
+      <!-- 상단 매물 표시: ?id= 가 있으면 매물 이름만 표시하고, ?id= 가 없으면 아래 select를 표시해 매물을 고르게 함 -->
+      <section class="room-context-card" aria-label="평가 중인 매물">
+        <h2 class="room-context-title">상도동 햇살빌라</h2>
+        <p class="room-context-sub">보증금 1,000 / 월세 52 · 방문일 2026-11-25</p>
+        <div class="form-field" id="memo-select-wrap">
+          <label class="field-label" for="memo-room-select">매물 선택</label>
+          <select id="memo-room-select" class="select-input">
+            <option value="1" selected>상도동 햇살빌라</option>
+            <option value="2">봉천동 청운하우스</option>
+            <option value="3">흑석동 그린원룸</option>
+            <option value="4">대방동 미소빌</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- 채광, 방음, 수압, 청결 4개 항목 별점 (채워진 별 --star, 빈 별 #E8DFD2) -->
+      <section class="rating-card" aria-label="항목별 별점 평가">
+        <div class="rating-row">
+          <span class="rating-label">채광</span>
+          <div class="star-group" role="group" aria-label="채광 별점">
+            <button type="button" class="star-btn is-filled" onclick="setStar(1, '채광', 1)" aria-label="채광 1점"><svg class="star-icon" viewBox="0 0 24 24"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9L12 2.5z"/></svg></button>
+            <button type="button" class="star-btn is-filled" onclick="setStar(1, '채광', 2)" aria-label="채광 2점"><svg class="star-icon" viewBox="0 0 24 24"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9L12 2.5z"/></svg></button>
+            <button type="button" class="star-btn is-filled" onclick="setStar(1, '채광', 3)" aria-label="채광 3점"><svg class="star-icon" viewBox="0 0 24 24"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9L12 2.5z"/></svg></button>
+            <button type="button" class="star-btn is-filled" onclick="setStar(1, '채광', 4)" aria-label="채광 4점"><svg class="star-icon" viewBox="0 0 24 24"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9L12 2.5z"/></svg></button>
+            <button type="button" class="star-btn is-filled" onclick="setStar(1, '채광', 5)" aria-label="채광 5점"><svg class="star-icon" viewBox="0 0 24 24"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9L12 2.5z"/></svg></button>
+          </div>
+        </div>
+
+        <div class="rating-row">
+          <span class="rating-label">방음</span>
+          <div class="star-group" role="group" aria-label="방음 별점">
+            <button type="button" class="star-btn is-filled" onclick="setStar(1, '방음', 1)" aria-label="방음 1점"><svg class="star-icon" viewBox="0 0 24 24"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9L12 2.5z"/></svg></button>
+            <button type="button" class="star-btn is-filled" onclick="setStar(1, '방음', 2)" aria-label="방음 2점"><svg class="star-icon" viewBox="0 0 24 24"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9L12 2.5z"/></svg></button>
+            <button type="button" class="star-btn is-filled" onclick="setStar(1, '방음', 3)" aria-label="방음 3점"><svg class="star-icon" viewBox="0 0 24 24"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9L12 2.5z"/></svg></button>
+            <button type="button" class="star-btn" onclick="setStar(1, '방음', 4)" aria-label="방음 4점"><svg class="star-icon" viewBox="0 0 24 24"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9L12 2.5z"/></svg></button>
+            <button type="button" class="star-btn" onclick="setStar(1, '방음', 5)" aria-label="방음 5점"><svg class="star-icon" viewBox="0 0 24 24"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9L12 2.5z"/></svg></button>
+          </div>
+        </div>
+
+        <div class="rating-row">
+          <span class="rating-label">수압</span>
+          <div class="star-group" role="group" aria-label="수압 별점">
+            <button type="button" class="star-btn is-filled" onclick="setStar(1, '수압', 1)" aria-label="수압 1점"><svg class="star-icon" viewBox="0 0 24 24"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9L12 2.5z"/></svg></button>
+            <button type="button" class="star-btn is-filled" onclick="setStar(1, '수압', 2)" aria-label="수압 2점"><svg class="star-icon" viewBox="0 0 24 24"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9L12 2.5z"/></svg></button>
+            <button type="button" class="star-btn is-filled" onclick="setStar(1, '수압', 3)" aria-label="수압 3점"><svg class="star-icon" viewBox="0 0 24 24"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9L12 2.5z"/></svg></button>
+            <button type="button" class="star-btn is-filled" onclick="setStar(1, '수압', 4)" aria-label="수압 4점"><svg class="star-icon" viewBox="0 0 24 24"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9L12 2.5z"/></svg></button>
+            <button type="button" class="star-btn" onclick="setStar(1, '수압', 5)" aria-label="수압 5점"><svg class="star-icon" viewBox="0 0 24 24"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9L12 2.5z"/></svg></button>
+          </div>
+        </div>
+
+        <div class="rating-row">
+          <span class="rating-label">청결</span>
+          <div class="star-group" role="group" aria-label="청결 별점">
+            <button type="button" class="star-btn is-filled" onclick="setStar(1, '청결', 1)" aria-label="청결 1점"><svg class="star-icon" viewBox="0 0 24 24"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9L12 2.5z"/></svg></button>
+            <button type="button" class="star-btn is-filled" onclick="setStar(1, '청결', 2)" aria-label="청결 2점"><svg class="star-icon" viewBox="0 0 24 24"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9L12 2.5z"/></svg></button>
+            <button type="button" class="star-btn is-filled" onclick="setStar(1, '청결', 3)" aria-label="청결 3점"><svg class="star-icon" viewBox="0 0 24 24"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9L12 2.5z"/></svg></button>
+            <button type="button" class="star-btn is-filled" onclick="setStar(1, '청결', 4)" aria-label="청결 4점"><svg class="star-icon" viewBox="0 0 24 24"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9L12 2.5z"/></svg></button>
+            <button type="button" class="star-btn" onclick="setStar(1, '청결', 5)" aria-label="청결 5점"><svg class="star-icon" viewBox="0 0 24 24"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9L12 2.5z"/></svg></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 평균 점수 표시 (나중에 JS의 calcAverage(room) 결과로 교체) -->
+      <div class="average-score-box">
+        <span class="average-score-label">평균 점수</span>
+        <strong class="average-score-value">4.0 / 5</strong>
+      </div>
+
+      <p id="memo-save-msg" class="save-status-banner" role="status" hidden></p>
+
+      <div class="form-field">
+        <label class="field-label" for="room-memo">현장 메모</label>
+        <textarea id="room-memo" class="textarea-input" placeholder="방을 직접 본 느낌이나 계약 시 확인할 내용을 적어 주세요">남향이라 낮에 햇빛이 잘 들어옴. 저녁 시간대 도로 소음 한 번 더 확인 필요.</textarea>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <button type="button" id="save-memo-btn" class="btn-primary" onclick="saveMemo(memoState.roomId, document.getElementById('room-memo').value)">저장</button>
+    </div>
+  </main>
+
+  <script src="js/common.js"></script>
+  <script src="js/memo.js"></script>
+</body>
+</html>

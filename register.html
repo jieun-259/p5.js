@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>매물 등록 · 자취방 선택 도우미</title>
+  <link href="https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- 상단 60px 헤더: ?id= 유무에 따라 JS로 제목을 '매물 등록' 또는 '매물 수정'으로 전환 -->
+  <header class="app-header">
+    <a href="index.html" class="back-btn" aria-label="뒤로 가기">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </a>
+    <h1 class="header-title">매물 등록</h1>
+  </header>
+
+  <div class="menu-dim" onclick="closeMenu()" aria-hidden="true"></div>
+  <aside class="side-menu" aria-label="전체 메뉴">
+    <div class="side-menu-head">
+      <span class="side-menu-brand">자취방 선택 도우미</span>
+      <button type="button" class="menu-close-btn" onclick="closeMenu()" aria-label="메뉴 닫기">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <nav class="side-menu-nav">
+      <a href="index.html" class="side-menu-link">홈</a>
+      <a href="register.html" class="side-menu-link is-active">매물 등록</a>
+      <a href="checklist.html" class="side-menu-link">현장 체크리스트</a>
+      <a href="memo.html" class="side-menu-link">메모와 별점</a>
+      <a href="calendar.html" class="side-menu-link">방문 일정</a>
+    </nav>
+  </aside>
+
+  <main class="main-wrap">
+    <div class="container">
+      <!-- 화면 확인용 예시: JS 연동 시 ?id= 여부에 따라 빈 폼 또는 해당 매물 값(예: 상도동 햇살빌라)으로 채움 -->
+      <form class="form-section" onsubmit="return false;">
+        <!-- 사진 1장 업로드 칸 (점선 테두리, 미리보기 영역) -->
+        <label class="photo-upload-box" for="room-photo">
+          <input type="file" id="room-photo" accept="image/*" onchange="previewPhoto(this.files[0])">
+          <img id="photo-preview" class="photo-preview-img" src="" alt="매물 사진 미리보기">
+          <span class="photo-upload-text">사진 1장 올리기</span>
+          <span class="photo-upload-sub">여기를 눌러 방 사진을 선택해 주세요</span>
+        </label>
+
+        <div class="form-field">
+          <label class="field-label" for="room-name">매물 이름</label>
+          <input type="text" id="room-name" class="text-input" placeholder="예: 상도동 햇살빌라" value="상도동 햇살빌라">
+        </div>
+
+        <div class="form-field">
+          <label class="field-label" for="room-address">주소</label>
+          <input type="text" id="room-address" class="text-input" placeholder="예: 서울 동작구 상도로 123" value="서울 동작구 상도로 123">
+        </div>
+
+        <div class="form-field">
+          <label class="field-label" for="room-visit-date">방문 날짜</label>
+          <input type="date" id="room-visit-date" class="date-input" value="2026-11-25">
+        </div>
+
+        <!-- 숫자 입력칸: 360px 이하 1열, 기본 2열, 768px 이상 3열 -->
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="field-label" for="room-deposit">보증금 (만원)</label>
+            <input type="number" id="room-deposit" class="number-input" placeholder="1000" value="1000">
+          </div>
+
+          <div class="form-field">
+            <label class="field-label" for="room-rent">월세 (만원)</label>
+            <input type="number" id="room-rent" class="number-input" placeholder="52" value="52">
+          </div>
+
+          <div class="form-field">
+            <label class="field-label" for="room-fee">관리비 (만원)</label>
+            <input type="number" id="room-fee" class="number-input" placeholder="5" value="5">
+          </div>
+
+          <div class="form-field">
+            <label class="field-label" for="room-area">면적 (㎡)</label>
+            <input type="number" id="room-area" class="number-input" placeholder="23" value="23">
+          </div>
+
+          <div class="form-field">
+            <label class="field-label" for="room-floor">층수 (층)</label>
+            <input type="number" id="room-floor" class="number-input" placeholder="3" value="3">
+          </div>
+
+          <div class="form-field">
+            <label class="field-label" for="room-time">이동 시간 (분)</label>
+            <input type="number" id="room-time" class="number-input" placeholder="8" value="8">
+          </div>
+        </div>
+
+        <!-- 관리비 포함 항목 (다중 선택, JS 연동 시 feeItems 배열로 저장하며 수정 모드에서는 저장된 항목 선택 표시) -->
+        <div class="form-field">
+          <span class="field-label">관리비 포함 항목</span>
+          <div class="fee-items-wrap" role="group" aria-label="관리비 포함 항목 선택">
+            <button type="button" class="fee-chip-btn is-selected" aria-pressed="true" onclick="toggleFeeItem('수도')">수도</button>
+            <button type="button" class="fee-chip-btn" aria-pressed="false" onclick="toggleFeeItem('전기')">전기</button>
+            <button type="button" class="fee-chip-btn" aria-pressed="false" onclick="toggleFeeItem('가스')">가스</button>
+            <button type="button" class="fee-chip-btn is-selected" aria-pressed="true" onclick="toggleFeeItem('인터넷')">인터넷</button>
+            <button type="button" class="fee-chip-btn" aria-pressed="false" onclick="toggleFeeItem('TV')">TV</button>
+            <button type="button" class="fee-chip-btn" aria-pressed="false" onclick="toggleFeeItem('청소비')">청소비</button>
+            <button type="button" class="fee-chip-btn" aria-pressed="false" onclick="toggleFeeItem('주차')">주차</button>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="field-label" for="room-etc">기타 정보</label>
+          <textarea id="room-etc" class="textarea-input" placeholder="관리자 연락처, 옵션 등 참고할 내용을 적어 주세요">관리자 010-1234-5678 / 수도·인터넷 관리비 포함</textarea>
+        </div>
+
+        <p id="form-error" class="guide-banner" role="alert" hidden></p>
+
+        <!-- 수정 모드(?id= 있을 때)에서만 표시할 하위 페이지 이동 버튼 -->
+        <!-- JS 연동 시 등록 모드에서는 hidden 처리 -->
+        <div class="edit-sub-links">
+          <a href="checklist.html?id=1" class="btn-outline">체크리스트 보기</a>
+          <a href="memo.html?id=1" class="btn-outline">메모와 별점 보기</a>
+        </div>
+      </form>
+    </div>
+
+    <!-- 하단 고정 버튼: 수정 모드에서는 삭제 버튼 표시, 등록 모드에서는 숨김 처리 -->
+    <div class="bottom-bar">
+      <button type="button" id="delete-room-btn" class="btn-danger-outline btn-narrow" onclick="deleteRoom()">삭제</button>
+      <button type="button" id="submit-room-btn" class="btn-primary" onclick="addRoom(getFormData())">등록</button>
+    </div>
+  </main>
+
+  <script src="js/common.js"></script>
+  <script src="js/register.js"></script>
+</body>
+</html>

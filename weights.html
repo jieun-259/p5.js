@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>가중치 설정 · 자취방 선택 도우미</title>
+  <link href="https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="app-header">
+    <a href="index.html" class="back-btn" aria-label="뒤로 가기">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </a>
+    <h1 class="header-title">가중치 설정</h1>
+  </header>
+
+  <div class="menu-dim" onclick="closeMenu()" aria-hidden="true"></div>
+  <aside class="side-menu" aria-label="전체 메뉴">
+    <div class="side-menu-head">
+      <span class="side-menu-brand">자취방 선택 도우미</span>
+      <button type="button" class="menu-close-btn" onclick="closeMenu()" aria-label="메뉴 닫기">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <nav class="side-menu-nav">
+      <a href="index.html" class="side-menu-link">홈</a>
+      <a href="register.html" class="side-menu-link">매물 등록</a>
+      <a href="checklist.html" class="side-menu-link">현장 체크리스트</a>
+      <a href="memo.html" class="side-menu-link">메모와 별점</a>
+      <a href="calendar.html" class="side-menu-link">방문 일정</a>
+    </nav>
+  </aside>
+
+  <main class="main-wrap">
+    <div class="container">
+      <p class="guide-banner">중요한 항목일수록 오른쪽으로 옮겨 주세요. 저장하면 홈 목록 순서에 반영돼요.</p>
+
+      <!-- JS 연동 영역: localStorage 'weights'({ price, dist, area, env }) 값 바인딩 -->
+      <section class="weight-list" aria-label="항목별 가중치 조절">
+        <div class="weight-card">
+          <div class="weight-card-head">
+            <label class="weight-name" for="weight-price">가격</label>
+            <span class="weight-percent">40%</span>
+          </div>
+          <input type="range" id="weight-price" class="weight-slider" min="0" max="10" value="8" oninput="setWeight('price', this.value)">
+        </div>
+
+        <div class="weight-card">
+          <div class="weight-card-head">
+            <label class="weight-name" for="weight-dist">거리</label>
+            <span class="weight-percent">30%</span>
+          </div>
+          <input type="range" id="weight-dist" class="weight-slider" min="0" max="10" value="6" oninput="setWeight('dist', this.value)">
+        </div>
+
+        <div class="weight-card">
+          <div class="weight-card-head">
+            <label class="weight-name" for="weight-area">면적</label>
+            <span class="weight-percent">15%</span>
+          </div>
+          <input type="range" id="weight-area" class="weight-slider" min="0" max="10" value="3" oninput="setWeight('area', this.value)">
+        </div>
+
+        <div class="weight-card">
+          <div class="weight-card-head">
+            <label class="weight-name" for="weight-env">집 상태</label>
+            <span class="weight-percent">15%</span>
+          </div>
+          <input type="range" id="weight-env" class="weight-slider" min="0" max="10" value="3" oninput="setWeight('env', this.value)">
+        </div>
+      </section>
+    </div>
+
+    <div class="bottom-bar">
+      <a href="index.html" class="btn-primary" onclick="saveWeights()">저장</a>
+    </div>
+  </main>
+
+  <script src="js/common.js"></script>
+  <script src="js/weights.js"></script>
+</body>
+</html>
